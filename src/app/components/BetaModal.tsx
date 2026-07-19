@@ -6,8 +6,8 @@ import { X } from 'lucide-react';
 // Note: Bot token is visible in frontend source. Risk is limited to someone
 // sending messages to your bot — they cannot read your messages or data.
 // ---------------------------------------------------------------------------
-const TG_TOKEN = '';
-const TG_CHAT_ID = '';
+const TG_TOKEN = '8895528557:AAEi-fDogFB-9a8ZL3twF8mlUqipyBXrIoQ';
+const TG_CHAT_ID = '7166041613';
 
 async function sendTelegramNotification(name: string, email: string) {
   const time = new Date().toLocaleString('en-IN', {
@@ -87,6 +87,7 @@ export function BetaModal({ onClose }: BetaModalProps) {
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState('');
   const [duplicateError, setDuplicateError] = useState(false);
+  const [serverError, setServerError] = useState('');
   const emailRef = useRef<HTMLInputElement>(null);
 
   // Close on Escape
@@ -108,7 +109,7 @@ export function BetaModal({ onClose }: BetaModalProps) {
     return () => { if (root) root.style.overflow = 'auto'; };
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const err = validateEmail(email);
     if (err) { setEmailError(err); return; }
@@ -121,14 +122,26 @@ export function BetaModal({ onClose }: BetaModalProps) {
 
     setEmailError('');
     setDuplicateError(false);
+    setServerError('');
     setModalState('loading');
 
-    // Save locally and notify via Telegram
-    setTimeout(() => {
+    try {
+      const res = await fetch('/api/join-beta', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email }),
+      });
+
+      if (!res.ok) {
+        throw new Error('Server error');
+      }
+
       saveBetaSignup(name, email);
-      sendTelegramNotification(name, email);
       setModalState('success');
-    }, 900);
+    } catch {
+      setServerError('Something went wrong. Please try again later.');
+      setModalState('form');
+    }
   };
 
   return (
@@ -250,7 +263,10 @@ export function BetaModal({ onClose }: BetaModalProps) {
                   type="text"
                   placeholder="Your name"
                   value={name}
-                  onChange={e => setName(e.target.value)}
+                  onChange={e => {
+                    setName(e.target.value);
+                    if (serverError) setServerError('');
+                  }}
                   disabled={modalState === 'loading'}
                   style={inputStyle(false)}
                 />
@@ -271,6 +287,7 @@ export function BetaModal({ onClose }: BetaModalProps) {
                     setEmail(e.target.value);
                     if (emailError) setEmailError('');
                     if (duplicateError) setDuplicateError(false);
+                    if (serverError) setServerError('');
                   }}
                   onBlur={() => { if (email) setEmailError(validateEmail(email)); }}
                   disabled={modalState === 'loading'}
@@ -299,6 +316,19 @@ export function BetaModal({ onClose }: BetaModalProps) {
               }}>
                 Your email will only be used to manage your access to the DaySeed beta testing program and related beta communications. It will never be shared publicly or sold.
               </p>
+
+              {serverError && (
+                <p style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: 13,
+                  fontWeight: 400,
+                  color: '#D4183D',
+                  textAlign: 'center',
+                  marginBottom: 16,
+                }}>
+                  {serverError}
+                </p>
+              )}
 
               {/* Submit */}
               <button
