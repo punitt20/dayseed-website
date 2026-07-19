@@ -6,8 +6,8 @@ import { X } from 'lucide-react';
 // Note: Bot token is visible in frontend source. Risk is limited to someone
 // sending messages to your bot — they cannot read your messages or data.
 // ---------------------------------------------------------------------------
-const TG_TOKEN = '8895528557:AAEi-fDogFB-9a8ZL3twF8mlUqipyBXrIoQ';
-const TG_CHAT_ID = '7166041613';
+const TG_TOKEN = '';
+const TG_CHAT_ID = '';
 
 async function sendTelegramNotification(name: string, email: string) {
   const time = new Date().toLocaleString('en-IN', {
