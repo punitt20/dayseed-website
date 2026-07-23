@@ -1,5 +1,7 @@
 # 🌱 DaySeed
 
+https://dayseed-website.pages.dev
+
 **Plant Today. Grow Tomorrow.**
 
 DaySeed is a simple productivity app designed to help you plan your day, stay focused, and build consistency—one day at a time.
